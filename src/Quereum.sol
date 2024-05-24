@@ -78,7 +78,7 @@ contract Quereum {
             status: 0, // status is active
             user: msg.sender, // the user posting the question
             reward: reward, // the reward for the question
-            responses: new uint256, // initializing responses array
+            responses: new uint256[](0), // initializing responses array
             rewardAllocated: false // reward not allocated yet
         });
 
@@ -92,5 +92,33 @@ contract Quereum {
     // View user details
     function viewUserDetails() public view returns (string memory, uint256) {
         return (accounts[msg.sender], balances[msg.sender]);
+    }
+
+    // View a question
+    function view_question(uint256 questionId) public view returns (string memory, uint256, uint256, address, uint256, uint256[] memory, bool) {
+        Question storage question = questions[questionId];
+        return (
+            question.question,
+            question.expirationTime,
+            question.status,
+            question.user,
+            question.reward,
+            question.responses,
+            question.rewardAllocated
+        );
+    }
+
+    // Endorse a question. This will take a uint256 index of the question and will take the msg.value and increment the reward of the question by that amount
+    function endorse_question(uint256 questionId, uint256 amount) public returns (bool) {
+        require(bytes(accounts[msg.sender]).length > 0, "User not registered");
+        require(amount > 0, "Amount must be greater than 0");
+        require(questions[questionId].status == 0, "Question is not active");
+        require(questions[questionId].expirationTime > block.timestamp, "Question has expired");
+        require(balances[msg.sender] >= amount, "Insufficient balance");
+
+        balances[msg.sender] -= amount;
+        questions[questionId].reward += amount;
+
+        return true;
     }
 }
