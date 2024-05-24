@@ -33,9 +33,9 @@ contract Quereum {
     }
 
     // add balance to the user's account
-    function addBalance(uint256 amount) public returns (bool) {
+    function addBalance() public payable returns (bool) {
         require(bytes(accounts[msg.sender]).length > 0, "User not registered");
-        balances[msg.sender] += amount;
+        balances[msg.sender] += msg.value;
         return true;
     }
 
@@ -71,6 +71,9 @@ contract Quereum {
             balances[msg.sender] >= totalLockedReward + reward,
             "Insufficient balance for reward"
         );
+
+        //make sure expiration time is after the current time
+        require(expirationTime > block.timestamp, "Invalid expiration time");
 
         Question memory newQuestion = Question({
             question: questionText, // the question text
