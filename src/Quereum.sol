@@ -30,12 +30,16 @@ contract Quereum {
 
     // Answer question posted by user
     function answer(uint256 question_index, string memory response, address respondent) public returns (bool) {
+        uint256 question_status = questions[question_index].status;
+        // check if question is closed or expired
+        if (question_status == 1 || question_status == 2) return false;
+        
         // get answer indices associated with respondent
         uint256[] memory answer_indices = userAnswers[respondent];
 
         //check if respondent has already answered the question
         for (uint256 i = 0; i < answer_indices.length; i++){
-            if(answers[answer_indices[i]].question_index == question_index) return false; // respondent already asnwered question
+            if (answers[answer_indices[i]].question_index == question_index) return false; // respondent already asnwered question
         }
 
         Answer memory answer_ = Answer({
@@ -46,8 +50,24 @@ contract Quereum {
             question_index: question_index
         });
         answers.push(answer_);
-
         return true; // successfully answered questioned
     }
 
+    // Endorse an answer posted by user
+    function endorse_answer(uint256 answer_index, address endorser) public returns (bool) {
+        uint256 question_status = questions[answers[answer_index].question_index].status;
+        // check if question is closed or expired
+        if (question_status == 1 || question_status == 2) return false;
+        
+        // check if endorser already endorsed answer
+        for(uint256 i = 0; i < answers[answer_index].endorsed_by.length; i++){
+            if (answers[answer_index].endorsed_by[i] == endorser){
+                return false; // endorser already endorsed this answer
+            }
+        }
+
+        answers[answer_index].endorsements++;
+        answers[answer_index].endorsed_by.push(endorser);
+        return true; // successfully endorsed answer
+    }
 }
