@@ -20,7 +20,7 @@ contract Quereum {
     // This function checks whether or not the question at that
     // index is expired. If it should be, it changes the necessary
     // struct variables. It returns true if the question is expired.
-    function expired(uint256 question_index) public {
+    function expired(uint256 question_index) public returns (bool) {
 
         // If the function is already closed, we don't need
         // to do anything.
