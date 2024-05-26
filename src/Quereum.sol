@@ -85,4 +85,20 @@ contract Quereum {
 
         return true;
     }
+
+    // This function allows the poster of a question to 
+    // close the question without allocating any rewards.
+    function close_without_reward(uint256 question_index) public {
+        require(msg.sender == questions[question_index].user,
+            "Only the question poster can close the question.");
+        require(!questions[question_index].rewardAllocated,
+            "Rewards have already been allocated.");
+
+        questions[question_index].status = 2;
+        questions[question_index].rewardAllocated = true;
+
+        // 10% reward penalty for closing without rewarding.
+        uint256 wouldveBeenReward = questions[question_index].reward;
+        balances[msg.sender] -= wouldveBeenReward / 10;
+    }
 }
