@@ -53,7 +53,7 @@ contract Quereum {
             "Insufficient balance for reward"
         );
 
-        //make sure expiration time is after the current time
+        // make sure expiration time is after the current time
         require(expirationTime > block.timestamp, "Invalid expiration time");
 
         Question memory newQuestion = Question({
