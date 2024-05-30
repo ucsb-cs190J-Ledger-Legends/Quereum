@@ -119,6 +119,9 @@ contract Quereum {
         // make sure expiration time is after the current time
         require(expirationTime > block.timestamp, "Invalid expiration time");
 
+        // deduct the reward from the user's balance
+        balances[msg.sender] -= reward;
+
         Question memory newQuestion = Question({
             question: questionText, // the question text
             expirationTime: expirationTime, // the expiration time
@@ -132,9 +135,6 @@ contract Quereum {
         // add the question to the array of questions and the user's questions
         questions.push(newQuestion);
         userQuestions[msg.sender].push(questions.length - 1);
-
-        // deduct the reward from the user's balance
-        balances[msg.sender] -= reward;
 
         return true;
     }
