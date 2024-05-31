@@ -2,7 +2,7 @@
 pragma solidity ^0.8.13;
 
 import {Test, console} from "lib/forge-std/src/Test.sol";
-import "forge-std/Vm.sol";
+import "lib/forge-std/src/Vm.sol";
 import {Quereum} from "src/Quereum.sol";
 
 contract RewardSpecialCasesTest is Test {
