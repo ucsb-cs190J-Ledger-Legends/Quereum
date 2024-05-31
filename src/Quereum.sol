@@ -34,6 +34,8 @@ contract Quereum {
         uint256 question_index,
         string memory response
     ) public returns (bool) {
+        require(bytes(accounts[msg.sender]).length > 0, "User not registered");
+        
         uint256 question_status = questions[question_index].status;
         // check if question is closed or expired
         if (question_status == 1 || question_status == 2) return false;
@@ -63,6 +65,7 @@ contract Quereum {
 
     // Endorse an answer posted by user
     function endorse_answer(uint256 answer_index) public returns (bool) {
+        require(bytes(accounts[msg.sender]).length > 0, "User not registered");
         uint256 question_status = questions[
             answers[answer_index].question_index
         ].status;
@@ -140,6 +143,7 @@ contract Quereum {
 
     // View user details
     function viewUserDetails() public view returns (string memory, uint256) {
+        require(bytes(accounts[msg.sender]).length > 0, "User not registered");
         return (accounts[msg.sender], balances[msg.sender]);
     }
 
@@ -194,6 +198,7 @@ contract Quereum {
     // This function allows a user to claim any reward
     // balance the app owns them.
     function claim_reward() public {
+        require(bytes(accounts[msg.sender]).length > 0, "User not registered");
         require(balances[msg.sender] > 0, "No reward to claim.");
 
         uint256 amountToSend = balances[msg.sender];
@@ -280,6 +285,7 @@ contract Quereum {
     // This function allows the poster of a question to 
     // close the question without allocating any rewards.
     function close_without_reward(uint256 question_index) public {
+        require(bytes(accounts[msg.sender]).length > 0, "User not registered");
         require(msg.sender == questions[question_index].user,
             "Only the question poster can close the question.");
         require(!questions[question_index].rewardAllocated,
