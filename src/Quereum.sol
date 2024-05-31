@@ -200,7 +200,7 @@ contract Quereum {
         balances[msg.sender] = 0; // Reset to prevent re-entrancy.
 
         (bool confirmation, ) = msg.sender.call{value: amountToSend}("");
-        require(confirmation, "Ether was not received properly.")
+        require(confirmation, "Ether was not received properly.");
     }
 
     // This function checks whether or not the question at that
@@ -218,7 +218,7 @@ contract Quereum {
         // it should be expired.
         if (questions[question_index].status == 0) {
 
-            if (questions[question_index].expirationTime >= block.timestamp) {
+            if (questions[question_index].expirationTime <= block.timestamp) {
                 questions[question_index].status = 1;
             }
 
@@ -231,37 +231,40 @@ contract Quereum {
         // assign rewards.
         if (questions[question_index].status == 1) {
 
-            uint256 max_endorsements = -1;
-            address[] most_endorsed_authors = [];
+            uint256 max_endorsements = 0;
+            address[] memory most_endorsed_authors = new address[](1000);
+            uint256 true_len = 0;
 
             // Traverse through all the answers for this question.
             for (uint256 response_index = 0;
                 response_index < questions[question_index].responses.length;
                 response_index++) {
                 
-                address_index = questions[question_index].responses[response_index];
+                uint256 answer_index = questions[question_index].responses[response_index];
 
                 if (answers[answer_index].endorsements > max_endorsements) {
                     max_endorsements = answers[answer_index].endorsements;
-                    most_endorsed_authors = [answers[answer_index].author];
+                    most_endorsed_authors[0] = answers[answer_index].author;
+                    true_len = 1;
                 }
 
                 else if (answers[answer_index].endorsements == max_endorsements) {
-                    most_endorsed_authors.push(answers[answer_index].author);
+                    most_endorsed_authors[true_len] = answers[answer_index].author;
+                    true_len++;
                 }
             }
 
             // If max_endorsements is not -1, reward the recipients.
-            if (max_endorsements != -1) {
+            if (max_endorsements != 0) {
                 uint256 reward = questions[question_index].reward;
-                uint256 allocation = reward / most_endorsed_authors.length;
+                uint256 allocation = reward / true_len;
 
-                for (uint256 i = 0; i < most_endorsed_authors.length; i++) {
+                for (uint256 i = 0; i < true_len; i++) {
                     balances[most_endorsed_authors[i]] += allocation;
                 }
             }
 
-            // If max_endorsements is -1, nobody answered the question.
+            // If max_endorsements is 0, nobody answered the question.
             // Give the entire reward back to the original asker.
             else {
                 uint256 reward = questions[question_index].reward;
