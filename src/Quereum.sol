@@ -83,15 +83,14 @@ contract Quereum {
 
     // Register a new user with a chosen name
     function register(
-        address userAddress,
         string memory name
     ) public returns (bool) {
         require(
-            bytes(accounts[userAddress]).length == 0,
+            bytes(accounts[msg.sender]).length == 0,
             "User already registered"
         );
-        accounts[userAddress] = name;
-        balances[userAddress] = 0; // initialize balance to 0
+        accounts[msg.sender] = name;
+        balances[msg.sender] = 0; // initialize balance to 0
         return true;
     }
 
