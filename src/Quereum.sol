@@ -39,6 +39,7 @@ contract Quereum {
         uint256 question_status = questions[question_index].status;
         // check if question is closed or expired
         if (question_status == 1 || question_status == 2) return false;
+        if (questions[question_index].expirationTime <= block.timestamp) return false;
 
         // get answer indices associated with respondent
         uint256[] memory answer_indices = userAnswers[msg.sender];
@@ -71,6 +72,7 @@ contract Quereum {
         ].status;
         // check if question is closed or expired
         if (question_status == 1 || question_status == 2) return false;
+        if (questions[answers[answer_index].question_index].expirationTime <= block.timestamp) return false;
 
         // check if endorser already endorsed answer
         for (uint256 i = 0; i < answers[answer_index].endorsed_by.length; i++) {
