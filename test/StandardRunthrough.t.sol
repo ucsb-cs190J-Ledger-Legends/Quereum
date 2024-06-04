@@ -31,6 +31,8 @@ contract StandardRunthroughTest is Test {
     // ========================== //
 
     // Test that users can register.
+    // Users should be able to register, and the app should
+    // keep track of the username.
     function test_register() public {
         vm.startPrank(alice);
         quereum.register("alice");
@@ -52,6 +54,7 @@ contract StandardRunthroughTest is Test {
     }
 
     // Test that users can send money to the contract.
+    // The app should be able to track the balance of the user.
     function test_add_balance() public {
         test_register(); // Continue from last time.
 
@@ -67,6 +70,7 @@ contract StandardRunthroughTest is Test {
     }
 
     // Test that users can add a question.
+    // The app should be able to record the question.
     function test_local_host_balance() public {
         test_add_balance(); // Continue from last time.
 
@@ -83,6 +87,7 @@ contract StandardRunthroughTest is Test {
     }
 
     // Test that users can endorse a question.
+    // The app should update the reward of the correct question.
     function test_endorse_question() public {
         test_local_host_balance(); // Continue from last time.
 
@@ -117,6 +122,8 @@ contract StandardRunthroughTest is Test {
     }
 
     // Test that users can claim rewards.
+    // The contract should send back the reward to be added
+    // to the true balance of the user.
     function test_claim_reward() public {
         test_endorse_answer(); // Continue from last time.
 

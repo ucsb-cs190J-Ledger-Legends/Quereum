@@ -67,11 +67,9 @@ contract RewardSpecialCasesTest is Test {
     // ==== local test cases ==== //
     // ========================== //
 
-    // CLOSE WITHOUT REWARDING
-        // SPLIT REWARDS
-        // NOBODY RESPONDS
-
     // Test that alice can close without rewarding.
+    // The app should make the question expire as well
+    // as not give any balance to the responders.
     function test_close_without_reward() public {
         setup_responses();
 
@@ -95,7 +93,8 @@ contract RewardSpecialCasesTest is Test {
     }
 
     // Test that two answers with equal endorsements
-    // split the reward.
+    // split the reward. The question should be expired, and
+    // 5 ether should be given to eve and mallory.
     function test_split_reward() public {
         setup_responses();
         skip(1200);
@@ -113,7 +112,7 @@ contract RewardSpecialCasesTest is Test {
         vm.stopPrank();
     }
 
-    // Test that if nobody responds, the ether should
+    // Test that if nobody responds, the 10 ether should
     // go back to alice.
     function test_no_response() public {
         skip(1200);
