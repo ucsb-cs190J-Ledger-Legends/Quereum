@@ -4,7 +4,11 @@ Our team, Ledger Legends, designed a smart contract application called Quereum t
 
 ## Set Up and Initialization
 
-[TO ADD]
+To set up the testing environment for Quereum, you will need to have installed the Foundry toolset for Solidity programming. In particular, you will need to be able to use the `forge` terminal command.
+
+Download this repository, and then, using the terminal, navigate to the directory where the repository was downloaded. Then, running the command `forge test` will run all the test cases for Quereum.
+
+To use the application for yourself, look through the `test/` directory for examples of how the runthrough is written. Then, create a new file in the `test/` directory with extension `.t.sol`. Create a new contract with a function whose name starts with `test_`, and use the API calls (see below) to test run features of the application.
 
 ## Primary Components
 
