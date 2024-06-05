@@ -177,6 +177,30 @@ contract Quereum {
         );
     }
 
+    // View answer details
+    function view_answer(
+        uint256 answerId
+    )
+        public
+        view
+        returns (
+            string memory,
+            address,
+            uint256,
+            address[] memory,
+            uint256
+        )
+    {
+        Answer storage answer = answers[answerId];
+        return (
+            answer.answer,
+            answer.author,
+            answer.endorsements,
+            answer.endorsed_by,
+            answer.question_index
+        );
+    }
+
     // Endorse a question.
     function endorse_question(
         uint256 questionId,
