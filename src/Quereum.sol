@@ -34,9 +34,12 @@ contract Quereum {
         uint256 question_index,
         string memory response
     ) public returns (bool) {
+        require(bytes(accounts[msg.sender]).length > 0, "User not registered");
+        
         uint256 question_status = questions[question_index].status;
         // check if question is closed or expired
         if (question_status == 1 || question_status == 2) return false;
+        if (questions[question_index].expirationTime <= block.timestamp) return false;
 
         // get answer indices associated with respondent
         uint256[] memory answer_indices = userAnswers[msg.sender];
@@ -63,11 +66,13 @@ contract Quereum {
 
     // Endorse an answer posted by user
     function endorse_answer(uint256 answer_index) public returns (bool) {
+        require(bytes(accounts[msg.sender]).length > 0, "User not registered");
         uint256 question_status = questions[
             answers[answer_index].question_index
         ].status;
         // check if question is closed or expired
         if (question_status == 1 || question_status == 2) return false;
+        if (questions[answers[answer_index].question_index].expirationTime <= block.timestamp) return false;
 
         // check if endorser already endorsed answer
         for (uint256 i = 0; i < answers[answer_index].endorsed_by.length; i++) {
@@ -140,6 +145,7 @@ contract Quereum {
 
     // View user details
     function viewUserDetails() public view returns (string memory, uint256) {
+        require(bytes(accounts[msg.sender]).length > 0, "User not registered");
         return (accounts[msg.sender], balances[msg.sender]);
     }
 
@@ -171,6 +177,30 @@ contract Quereum {
         );
     }
 
+    // View answer details
+    function view_answer(
+        uint256 answerId
+    )
+        public
+        view
+        returns (
+            string memory,
+            address,
+            uint256,
+            address[] memory,
+            uint256
+        )
+    {
+        Answer storage answer = answers[answerId];
+        return (
+            answer.answer,
+            answer.author,
+            answer.endorsements,
+            answer.endorsed_by,
+            answer.question_index
+        );
+    }
+
     // Endorse a question.
     function endorse_question(
         uint256 questionId,
@@ -194,13 +224,14 @@ contract Quereum {
     // This function allows a user to claim any reward
     // balance the app owns them.
     function claim_reward() public {
+        require(bytes(accounts[msg.sender]).length > 0, "User not registered");
         require(balances[msg.sender] > 0, "No reward to claim.");
 
         uint256 amountToSend = balances[msg.sender];
         balances[msg.sender] = 0; // Reset to prevent re-entrancy.
 
         (bool confirmation, ) = msg.sender.call{value: amountToSend}("");
-        require(confirmation, "Ether was not received properly.")
+        require(confirmation, "Ether was not received properly.");
     }
 
     // This function checks whether or not the question at that
@@ -218,7 +249,7 @@ contract Quereum {
         // it should be expired.
         if (questions[question_index].status == 0) {
 
-            if (questions[question_index].expirationTime >= block.timestamp) {
+            if (questions[question_index].expirationTime <= block.timestamp) {
                 questions[question_index].status = 1;
             }
 
@@ -231,37 +262,40 @@ contract Quereum {
         // assign rewards.
         if (questions[question_index].status == 1) {
 
-            uint256 max_endorsements = -1;
-            address[] most_endorsed_authors = [];
+            uint256 max_endorsements = 0;
+            address[] memory most_endorsed_authors = new address[](1000);
+            uint256 true_len = 0;
 
             // Traverse through all the answers for this question.
             for (uint256 response_index = 0;
                 response_index < questions[question_index].responses.length;
                 response_index++) {
                 
-                address_index = questions[question_index].responses[response_index];
+                uint256 answer_index = questions[question_index].responses[response_index];
 
                 if (answers[answer_index].endorsements > max_endorsements) {
                     max_endorsements = answers[answer_index].endorsements;
-                    most_endorsed_authors = [answers[answer_index].author];
+                    most_endorsed_authors[0] = answers[answer_index].author;
+                    true_len = 1;
                 }
 
                 else if (answers[answer_index].endorsements == max_endorsements) {
-                    most_endorsed_authors.push(answers[answer_index].author);
+                    most_endorsed_authors[true_len] = answers[answer_index].author;
+                    true_len++;
                 }
             }
 
             // If max_endorsements is not -1, reward the recipients.
-            if (max_endorsements != -1) {
+            if (max_endorsements != 0) {
                 uint256 reward = questions[question_index].reward;
-                uint256 allocation = reward / most_endorsed_authors.length;
+                uint256 allocation = reward / true_len;
 
-                for (uint256 i = 0; i < most_endorsed_authors.length; i++) {
+                for (uint256 i = 0; i < true_len; i++) {
                     balances[most_endorsed_authors[i]] += allocation;
                 }
             }
 
-            // If max_endorsements is -1, nobody answered the question.
+            // If max_endorsements is 0, nobody answered the question.
             // Give the entire reward back to the original asker.
             else {
                 uint256 reward = questions[question_index].reward;
@@ -277,6 +311,7 @@ contract Quereum {
     // This function allows the poster of a question to 
     // close the question without allocating any rewards.
     function close_without_reward(uint256 question_index) public {
+        require(bytes(accounts[msg.sender]).length > 0, "User not registered");
         require(msg.sender == questions[question_index].user,
             "Only the question poster can close the question.");
         require(!questions[question_index].rewardAllocated,
